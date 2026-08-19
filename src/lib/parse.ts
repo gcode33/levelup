@@ -1,6 +1,7 @@
 import { extractText } from "unpdf";
 import mammoth from "mammoth";
 import { parsedProfileSchema, type ParsedProfile } from "./schemas";
+import { completeChat, parseJsonFromLLM } from "./llm";
 
 const MAX_TEXT_LENGTH = 20000;
 
@@ -36,26 +37,6 @@ ${clamped}
 
 Return only the JSON object.`;
 
-  const res = await fetch(`${process.env.LLM_BASE_URL}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.LLM_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: process.env.LLM_MODEL,
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0,
-    }),
-  });
-
-  if (!res.ok) {
-    throw new Error(`LLM request failed (${res.status})`);
-  }
-
-  const data = await res.json();
-  const content: string = data.choices?.[0]?.message?.content ?? "";
-  const jsonText = content.replace(/```json|```/g, "").trim();
-  const parsed = JSON.parse(jsonText);
-  return parsedProfileSchema.parse(parsed);
+  const content = await completeChat(prompt, { maxTokens: 2000 });
+  return parsedProfileSchema.parse(parseJsonFromLLM(content));
 }

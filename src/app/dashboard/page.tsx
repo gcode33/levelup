@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/login/actions";
 import ResumeForm from "./resume-form";
+import RoadmapForm from "./roadmap-form";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -19,6 +20,15 @@ export default async function DashboardPage() {
 
   const hasResume = Boolean(profile?.level_band);
 
+  const { data: roadmap } = await supabase
+    .from("roadmaps")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("is_active", true)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-6 py-12">
       <h1 className="text-3xl font-semibold">Dashboard</h1>
@@ -27,23 +37,47 @@ export default async function DashboardPage() {
       </p>
 
       {hasResume ? (
-        <section className="flex flex-col gap-2 rounded-xl border border-black/10 p-6">
-          <h2 className="text-xl font-medium">Your profile</h2>
-          <p>
-            Role: <span className="font-medium">{profile.current_title ?? "—"}</span>
-          </p>
-          <p>
-            Level: <span className="font-medium">{profile.level_band}</span>
-          </p>
-          <p>
-            Years experience:{" "}
-            <span className="font-medium">{profile.years_exp ?? "—"}</span>
-          </p>
-          <p>
-            Skills:{" "}
-            <span className="font-medium">{profile.skills?.join(", ") || "—"}</span>
-          </p>
-        </section>
+        <>
+          <section className="flex flex-col gap-2 rounded-xl border border-black/10 p-6">
+            <h2 className="text-xl font-medium">Your profile</h2>
+            <p>
+              Role: <span className="font-medium">{profile.current_title ?? "—"}</span>
+            </p>
+            <p>
+              Level: <span className="font-medium">{profile.level_band}</span>
+            </p>
+            <p>
+              Years experience:{" "}
+              <span className="font-medium">{profile.years_exp ?? "—"}</span>
+            </p>
+            <p>
+              Skills:{" "}
+              <span className="font-medium">{profile.skills?.join(", ") || "—"}</span>
+            </p>
+          </section>
+
+          <RoadmapForm />
+
+          {roadmap?.status === "ready" && (
+            <section className="flex flex-col gap-3 rounded-xl border border-black/10 p-6">
+              <h2 className="text-xl font-medium">
+                Roadmap: {roadmap.target_role}
+              </h2>
+              <ol className="flex flex-col gap-3">
+                {roadmap.levels.map((level: { index: number; title: string; description: string }) => (
+                  <li key={level.index} className="flex flex-col gap-1">
+                    <span className="font-medium">
+                      {level.index + 1}. {level.title}
+                    </span>
+                    <span className="text-sm text-zinc-600 dark:text-zinc-400">
+                      {level.description}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+        </>
       ) : (
         <ResumeForm />
       )}
