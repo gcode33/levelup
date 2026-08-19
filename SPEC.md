@@ -28,7 +28,7 @@ LevelUp turns a resume into a personalized, game-like career roadmap. A user upl
 
 Postgres tables (Supabase). `id`/timestamps omitted for brevity.
 
-- **profiles** — `user_id` (FK → auth.users, PK), `resume_path`, `current_role`, `level_band` (`Junior` | `Mid` | `Senior` | `Staff`), `current_pay int null`, `skills jsonb`, `years_exp int null`. Holds the user's *current* state only (no target fields). Extracted resume text is used transiently for parsing and not persisted.
+- **profiles** — `user_id` (FK → auth.users, PK), `resume_path`, `current_title`, `level_band` (`Junior` | `Mid` | `Senior` | `Staff`), `current_pay int null`, `skills jsonb`, `years_exp int null`. Holds the user's *current* state only (no target fields). Extracted resume text is used transiently for parsing and not persisted.
 - **roadmaps** — `id`, `user_id`, `target_role`, `target_pay int null`, `levels jsonb`, `status` (`pending` | `ready` | `failed`), `is_active boolean`, `created_at`. The generated roadmap is stored as a single JSON document — generated once, read often, immutable except for regeneration. A user may have multiple roadmaps (history); exactly one is `is_active`. Only `target_role` is required.
 - **progress** — `user_id`, `roadmap_id`, `current_level_index int`, `completed jsonb` (per-level: `best_score`, `passed`, `attempts`), `updated_at`. One row per user+roadmap.
 - **user_preferences** — `user_id` (PK), `theme` (preset theme id), `background` (accent color / preset). Created on onboarding; updated via upsert.
@@ -63,7 +63,7 @@ Postgres tables (Supabase). `id`/timestamps omitted for brevity.
 
 ```ts
 type ParsedProfile = {
-  current_role: string | null;
+  current_title: string | null;
   level_band: "Junior" | "Mid" | "Senior" | "Staff";
   skills: string[];
   years_exp: number | null;
