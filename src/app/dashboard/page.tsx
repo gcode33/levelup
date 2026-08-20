@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/login/actions";
 import ResumeForm from "./resume-form";
 import RoadmapForm from "./roadmap-form";
+import RoadmapMap from "@/components/roadmap-map";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -29,8 +30,19 @@ export default async function DashboardPage() {
     .limit(1)
     .maybeSingle();
 
+  let currentLevelIndex = 0;
+  if (roadmap?.status === "ready") {
+    const { data: progress } = await supabase
+      .from("progress")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("roadmap_id", roadmap.id)
+      .maybeSingle();
+    currentLevelIndex = progress?.current_level_index ?? 0;
+  }
+
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-6 py-12">
+    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-12">
       <h1 className="text-3xl font-semibold">Dashboard</h1>
       <p>
         Signed in as <span className="font-medium">{user.email}</span>
@@ -59,22 +71,11 @@ export default async function DashboardPage() {
           <RoadmapForm />
 
           {roadmap?.status === "ready" && (
-            <section className="flex flex-col gap-3 rounded-xl border border-black/10 p-6">
+            <section className="flex flex-col gap-3">
               <h2 className="text-xl font-medium">
                 Roadmap: {roadmap.target_role}
               </h2>
-              <ol className="flex flex-col gap-3">
-                {roadmap.levels.map((level: { index: number; title: string; description: string }) => (
-                  <li key={level.index} className="flex flex-col gap-1">
-                    <span className="font-medium">
-                      {level.index + 1}. {level.title}
-                    </span>
-                    <span className="text-sm text-zinc-600 dark:text-zinc-400">
-                      {level.description}
-                    </span>
-                  </li>
-                ))}
-              </ol>
+              <RoadmapMap levels={roadmap.levels} currentLevelIndex={currentLevelIndex} />
             </section>
           )}
         </>
