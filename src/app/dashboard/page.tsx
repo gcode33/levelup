@@ -55,6 +55,12 @@ export default async function DashboardPage() {
     .order("min_level_index", { ascending: false })
     .limit(10);
 
+  // Strip the quiz answer key before it reaches the client.
+  const safeLevels = (roadmap?.levels ?? []).map((lv: any) => ({
+    ...lv,
+    quiz: (lv.quiz ?? []).map((q: any) => ({ question: q.question, options: q.options })),
+  }));
+
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-12">
       <h1 className="text-3xl font-semibold">Dashboard</h1>
@@ -96,7 +102,7 @@ export default async function DashboardPage() {
               </h2>
               <RoadmapViewer
                 roadmapId={roadmap.id}
-                levels={roadmap.levels}
+                levels={safeLevels}
                 currentLevelIndex={currentLevelIndex}
               />
             </section>

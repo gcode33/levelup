@@ -9,8 +9,6 @@ type Lesson = { title: string; content: string; key_points: string[] };
 type QuizQuestion = {
   question: string;
   options: string[];
-  answer_index: number;
-  explanation: string;
 };
 type Project = { title: string; description: string; skills_used: string[] };
 
@@ -37,6 +35,7 @@ export default function RoadmapViewer({
   const [selectedIndex, setSelectedIndex] = useState<number | null>(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [result, setResult] = useState<QuizResult | null>(null);
+  const [pending, setPending] = useState(false);
 
   const level = levels.find((l) => l.index === selectedIndex) ?? null;
   const completed = level ? level.index < currentLevelIndex : false;
@@ -54,10 +53,12 @@ export default function RoadmapViewer({
   }
 
   async function handleSubmit() {
-    if (!level) return;
+    if (!level || pending) return;
+    setPending(true);
     const answerArr = quiz.map((_, i) => answers[i] ?? -1);
     const res = await submitQuiz(roadmapId, level.index, answerArr);
     setResult(res);
+    setPending(false);
     if (!res.error) router.refresh();
   }
 
@@ -119,18 +120,23 @@ export default function RoadmapViewer({
 
               <button
                 onClick={handleSubmit}
-                className="mt-4 rounded bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
+                disabled={pending}
+                className="mt-4 rounded bg-black px-4 py-2 text-white disabled:opacity-50 dark:bg-white dark:text-black"
               >
-                Submit quiz
+                {pending ? "Checking…" : "Submit quiz"}
               </button>
 
-              {result && (
+              {result?.error ? (
+                <p className="mt-2 text-sm text-red-600">
+                  Something went wrong scoring your quiz — please try again.
+                </p>
+              ) : result ? (
                 <p className="mt-2 text-sm">
                   {result.passed
                     ? `✅ Passed (${result.correct}/${result.total})`
                     : `❌ ${result.correct}/${result.total} — need at least 70%`}
                 </p>
-              )}
+              ) : null}
 
               {(completed || result?.passed) && (
                 <>

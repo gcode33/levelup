@@ -28,8 +28,8 @@ export async function generateRoadmapAction(
   let targetPay: number | null = null;
   if (targetPayRaw) {
     targetPay = Number(targetPayRaw);
-    if (Number.isNaN(targetPay)) {
-      return { error: "Target pay must be a number", levelsCount: null };
+    if (!Number.isFinite(targetPay) || targetPay <= 0) {
+      return { error: "Target pay must be a positive number", levelsCount: null };
     }
   }
 
@@ -51,13 +51,9 @@ export async function generateRoadmapAction(
     current_pay: profile.current_pay,
   };
 
-  // Deactivate any existing active roadmap.
-  await supabase
-    .from("roadmaps")
-    .update({ is_active: false })
-    .eq("user_id", user.id)
-    .eq("is_active", true);
-
+  // Insert the new roadmap as pending and INACTIVE. We only promote it to
+  // active (and retire the previous one) once generation succeeds, so a
+  // failed regeneration never strands the user without their old roadmap.
   const { data: roadmap, error: insertError } = await supabase
     .from("roadmaps")
     .insert({
@@ -65,7 +61,7 @@ export async function generateRoadmapAction(
       target_role: targetRole,
       target_pay: targetPay,
       status: "pending",
-      is_active: true,
+      is_active: false,
     })
     .select()
     .single();
@@ -76,11 +72,23 @@ export async function generateRoadmapAction(
 
   try {
     const generated = await generateRoadmap(parsed, targetRole, targetPay);
+
     const { error: updateError } = await supabase
       .from("roadmaps")
-      .update({ levels: generated.levels, status: "ready" })
+      .update({ levels: generated.levels, status: "ready", is_active: true })
       .eq("id", roadmap.id);
-    if (updateError) return { error: updateError.message, levelsCount: null };
+    if (updateError) {
+      await supabase.from("roadmaps").update({ status: "failed" }).eq("id", roadmap.id);
+      return { error: updateError.message, levelsCount: null };
+    }
+
+    // Retire any other active roadmaps, keeping the freshly generated one.
+    await supabase
+      .from("roadmaps")
+      .update({ is_active: false })
+      .eq("user_id", user.id)
+      .eq("is_active", true)
+      .neq("id", roadmap.id);
 
     revalidatePath("/dashboard");
     return { error: null, levelsCount: generated.levels.length };
