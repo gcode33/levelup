@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/login/actions";
 import ResumeForm from "./resume-form";
 import RoadmapForm from "./roadmap-form";
-import RoadmapMap from "@/components/roadmap-map";
+import RoadmapViewer from "@/components/roadmap-viewer";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -75,7 +75,11 @@ export default async function DashboardPage() {
               <h2 className="text-xl font-medium">
                 Roadmap: {roadmap.target_role}
               </h2>
-              <RoadmapMap levels={roadmap.levels} currentLevelIndex={currentLevelIndex} />
+              <RoadmapViewer
+                roadmapId={roadmap.id}
+                levels={roadmap.levels}
+                currentLevelIndex={currentLevelIndex}
+              />
             </section>
           )}
         </>
