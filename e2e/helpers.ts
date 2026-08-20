@@ -22,3 +22,29 @@ export async function deleteTestUser(userId: string) {
   const admin = createAdminClient();
   await admin.auth.admin.deleteUser(userId);
 }
+
+export async function seedProfile(userId: string) {
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("profiles")
+    .update({
+      current_title: "Frontend Developer",
+      level_band: "Mid",
+      skills: ["React", "TypeScript"],
+      years_exp: 3,
+    })
+    .eq("user_id", userId);
+  if (error) throw error;
+}
+
+export async function seedRoadmap(userId: string, levels: unknown[]) {
+  const admin = createAdminClient();
+  const { error } = await admin.from("roadmaps").insert({
+    user_id: userId,
+    target_role: "Senior Frontend Engineer",
+    levels,
+    status: "ready",
+    is_active: true,
+  });
+  if (error) throw error;
+}
