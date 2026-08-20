@@ -6,6 +6,7 @@ import { extractResumeText, parseResume } from "@/lib/parse";
 import type { ParsedProfile } from "@/lib/schemas";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MIN_TEXT_LENGTH = 50;
 
 export type ResumeState = {
   error: string | null;
@@ -47,11 +48,27 @@ export async function uploadResume(
       .update({ resume_path: path })
       .eq("user_id", user.id);
 
-    text = await extractResumeText(file);
+    try {
+      text = await extractResumeText(file);
+    } catch {
+      return {
+        error: "Couldn't read that file — please paste your resume text instead",
+        profile: null,
+      };
+    }
   } else if (pasted) {
     text = pasted;
   } else {
     return { error: "Upload a resume or paste your resume text", profile: null };
+  }
+
+  // Reject empty / near-empty text so a scanned or garbage file doesn't
+  // produce a bogus "Junior, no skills" profile.
+  if (text.trim().length < MIN_TEXT_LENGTH) {
+    return {
+      error: "We couldn't read enough text — please check the file or paste your resume text",
+      profile: null,
+    };
   }
 
   try {

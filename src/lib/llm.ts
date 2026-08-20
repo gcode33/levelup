@@ -23,6 +23,20 @@ export async function completeChat(
 }
 
 export function parseJsonFromLLM<T>(content: string): T {
-  const jsonText = content.replace(/```json|```/g, "").trim();
-  return JSON.parse(jsonText) as T;
+  const cleaned = content
+    .replace(/```[a-zA-Z]*\s*/g, "")
+    .replace(/```/g, "")
+    .trim();
+
+  try {
+    return JSON.parse(cleaned) as T;
+  } catch {
+    // Fallback: extract the first balanced { ... } object (LLMs often wrap JSON in prose).
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+    if (start >= 0 && end > start) {
+      return JSON.parse(cleaned.slice(start, end + 1)) as T;
+    }
+    throw new Error("No valid JSON object found in LLM output");
+  }
 }

@@ -38,14 +38,21 @@ export async function submitQuiz(
   if (!level)
     return { error: "Level not found", correct: 0, total: 0, score: 0, passed: false };
 
-  const { correct, total, score, passed } = scoreQuiz(level.quiz, answers);
-
   const { data: progress } = await supabase
     .from("progress")
     .select("*")
     .eq("user_id", user.id)
     .eq("roadmap_id", roadmapId)
     .maybeSingle();
+
+  const currentLevelIndex = progress?.current_level_index ?? 0;
+
+  // Only the currently unlocked level can be scored; reject locked levels.
+  if (levelIndex > currentLevelIndex) {
+    return { error: "This level is locked", correct: 0, total: 0, score: 0, passed: false };
+  }
+
+  const { correct, total, score, passed } = scoreQuiz(level.quiz, answers);
 
   const completed: Record<string, { best_score: number; passed: boolean; attempts: number }> = {
     ...(progress?.completed ?? {}),
@@ -59,9 +66,7 @@ export async function submitQuiz(
       attempts: prev.attempts + 1,
     },
   };
-  const newCurrentIndex = passed
-    ? Math.max(progress?.current_level_index ?? 0, levelIndex + 1)
-    : (progress?.current_level_index ?? 0);
+  const newCurrentIndex = passed ? Math.max(currentLevelIndex, levelIndex + 1) : currentLevelIndex;
 
   const { error } = await supabase.from("progress").upsert(
     {

@@ -15,12 +15,8 @@ const validLevel = {
 
 describe("roadmapSchema", () => {
   it("accepts a valid roadmap with 3 levels", () => {
-    expect(() =>
-      roadmapSchema.parse({
-        target_role: "X",
-        levels: [validLevel, validLevel, validLevel],
-      }),
-    ).not.toThrow();
+    const levels = [0, 1, 2].map((i) => ({ ...validLevel, index: i }));
+    expect(() => roadmapSchema.parse({ target_role: "X", levels })).not.toThrow();
   });
 
   it("rejects fewer than 3 levels", () => {

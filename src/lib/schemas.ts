@@ -47,10 +47,18 @@ export const levelSchema = z.object({
   projects: z.array(projectSchema),
 });
 
-export const roadmapSchema = z.object({
-  target_role: z.string(),
-  levels: z.array(levelSchema).min(3).max(8),
-});
+export const roadmapSchema = z
+  .object({
+    target_role: z.string().min(1),
+    levels: z.array(levelSchema).min(3).max(8),
+  })
+  .refine(
+    (r) => {
+      const indices = r.levels.map((l) => l.index).sort((a, b) => a - b);
+      return indices.every((idx, i) => idx === i);
+    },
+    { message: "levels must have contiguous, zero-based indices" },
+  );
 
 export type Roadmap = z.infer<typeof roadmapSchema>;
 export type Level = z.infer<typeof levelSchema>;
