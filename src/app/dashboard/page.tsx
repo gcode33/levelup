@@ -41,6 +41,13 @@ export default async function DashboardPage() {
     currentLevelIndex = progress?.current_level_index ?? 0;
   }
 
+  const { data: jobs } = await supabase
+    .from("job_postings")
+    .select("*")
+    .lte("min_level_index", currentLevelIndex)
+    .order("min_level_index", { ascending: false })
+    .limit(10);
+
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-12">
       <h1 className="text-3xl font-semibold">Dashboard</h1>
@@ -80,6 +87,31 @@ export default async function DashboardPage() {
                 levels={roadmap.levels}
                 currentLevelIndex={currentLevelIndex}
               />
+            </section>
+          )}
+
+          {jobs && jobs.length > 0 && (
+            <section className="flex flex-col gap-3 rounded-xl border border-black/10 p-6">
+              <h2 className="text-xl font-medium">Jobs you're ready for</h2>
+              <ul className="flex flex-col gap-2">
+                {jobs.map((job) => (
+                  <li key={job.id} className="flex items-center justify-between gap-2 text-sm">
+                    <span>
+                      <span className="font-medium">{job.title}</span> — {job.company}
+                    </span>
+                    {job.url && (
+                      <a
+                        href={job.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600"
+                      >
+                        Apply
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </section>
           )}
         </>
