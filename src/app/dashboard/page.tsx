@@ -4,6 +4,7 @@ import { signOut } from "@/app/login/actions";
 import ResumeForm from "./resume-form";
 import RoadmapForm from "./roadmap-form";
 import RoadmapViewer from "@/components/roadmap-viewer";
+import PersonalizeForm from "./personalize-form";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -20,6 +21,12 @@ export default async function DashboardPage() {
     .single();
 
   const hasResume = Boolean(profile?.level_band);
+
+  const { data: prefs } = await supabase
+    .from("user_preferences")
+    .select("*")
+    .eq("user_id", user.id)
+    .single();
 
   const { data: roadmap } = await supabase
     .from("roadmaps")
@@ -54,6 +61,11 @@ export default async function DashboardPage() {
       <p>
         Signed in as <span className="font-medium">{user.email}</span>
       </p>
+
+      <PersonalizeForm
+        theme={prefs?.theme ?? null}
+        background={prefs?.background ?? null}
+      />
 
       {hasResume ? (
         <>
