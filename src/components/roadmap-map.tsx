@@ -21,6 +21,7 @@ type LevelNodeData = {
   title: string;
   description: string;
   status: LevelStatus;
+  selected?: boolean;
 };
 
 type LevelNode = Node<LevelNodeData, "level">;
@@ -29,7 +30,7 @@ const NODE_WIDTH = 240;
 const NODE_HEIGHT = 100;
 
 function LevelNodeComponent({ data }: NodeProps<LevelNode>) {
-  const { status, title, description } = data;
+  const { status, title, description, selected } = data;
   const locked = status === "locked";
   const completed = status === "completed";
 
@@ -39,10 +40,11 @@ function LevelNodeComponent({ data }: NodeProps<LevelNode>) {
       ? "border-green-400 bg-green-50 text-black"
       : "border-blue-500 bg-blue-50 text-black shadow-md";
 
+  const ring = selected ? "ring-2 ring-blue-500 ring-offset-2" : "";
   const icon = locked ? "🔒" : completed ? "✅" : "▶";
 
   return (
-    <div className={`w-[220px] rounded-xl border-2 px-4 py-3 text-sm transition-colors ${box}`}>
+    <div className={`w-[220px] rounded-xl border-2 px-4 py-3 text-sm transition-all ${box} ${ring}`}>
       <Handle
         type="target"
         position={Position.Top}
@@ -80,9 +82,13 @@ function layoutNodes(nodes: LevelNode[], edges: Edge[]): LevelNode[] {
 export default function RoadmapMap({
   levels,
   currentLevelIndex,
+  selectedIndex,
+  onNodeClick,
 }: {
   levels: { index: number; title: string; description: string }[];
   currentLevelIndex: number;
+  selectedIndex?: number | null;
+  onNodeClick?: (index: number) => void;
 }) {
   const { nodes, edges } = useMemo(() => {
     const statusOf = (i: number): LevelStatus =>
@@ -92,7 +98,12 @@ export default function RoadmapMap({
       id: String(lv.index),
       type: "level",
       position: { x: 0, y: 0 },
-      data: { title: lv.title, description: lv.description, status: statusOf(lv.index) },
+      data: {
+        title: lv.title,
+        description: lv.description,
+        status: statusOf(lv.index),
+        selected: selectedIndex === lv.index,
+      },
     }));
 
     const rawEdges: Edge[] = levels.slice(1).map((lv) => ({
@@ -104,11 +115,17 @@ export default function RoadmapMap({
     }));
 
     return { nodes: layoutNodes(rawNodes, rawEdges), edges: rawEdges };
-  }, [levels, currentLevelIndex]);
+  }, [levels, currentLevelIndex, selectedIndex]);
 
   return (
     <div className="h-[560px] w-full rounded-xl border border-black/10">
-      <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} fitView>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
+        fitView
+        onNodeClick={(_, node) => onNodeClick?.(Number(node.id))}
+      >
         <Background />
         <Controls />
         <MiniMap />

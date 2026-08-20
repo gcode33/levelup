@@ -34,7 +34,8 @@ test("the roadmap renders as an interactive map", async ({ page }) => {
   await page.getByRole("button", { name: "Sign in" }).click();
 
   await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByText("Master the Basics")).toBeVisible();
-  await expect(page.getByText("Build Real Projects")).toBeVisible();
-  await expect(page.locator(".react-flow")).toBeVisible();
+  const map = page.locator(".react-flow");
+  await expect(map).toBeVisible();
+  await expect(map.getByText("Master the Basics")).toBeVisible();
+  await expect(map.getByText("Build Real Projects")).toBeVisible();
 });
