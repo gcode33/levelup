@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { fetchRemoteJobs } from "@/lib/jobs";
 import { signOut } from "@/app/login/actions";
 import ResumeForm from "./resume-form";
 import RoadmapForm from "./roadmap-form";
@@ -48,12 +49,7 @@ export default async function DashboardPage() {
     currentLevelIndex = progress?.current_level_index ?? 0;
   }
 
-  const { data: jobs } = await supabase
-    .from("job_postings")
-    .select("*")
-    .lte("min_level_index", currentLevelIndex)
-    .order("min_level_index", { ascending: false })
-    .limit(10);
+  const jobs = await fetchRemoteJobs(currentLevelIndex);
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-12">
@@ -107,14 +103,18 @@ export default async function DashboardPage() {
             </section>
           )}
 
-          {jobs && jobs.length > 0 && (
+          {jobs.length > 0 && (
             <section className="flex flex-col gap-3 rounded-xl border border-black/10 p-6">
-              <h2 className="text-xl font-medium">Jobs you're ready for</h2>
+              <h2 className="text-xl font-medium">Jobs you&apos;re ready for</h2>
+              <p className="text-xs text-zinc-500">Remote roles via Remotive</p>
               <ul className="flex flex-col gap-2">
                 {jobs.map((job) => (
                   <li key={job.id} className="flex items-center justify-between gap-2 text-sm">
                     <span>
                       <span className="font-medium">{job.title}</span> — {job.company}
+                      {job.location && (
+                        <span className="text-zinc-500"> · {job.location}</span>
+                      )}
                     </span>
                     {job.url && (
                       <a
