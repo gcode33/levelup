@@ -20,7 +20,7 @@ const components: Components = {
   li: ({ node, ...props }) => <li className="my-1" {...props} />,
   a: ({ node, ...props }) => (
     <a
-      className="text-blue-600 underline"
+      className="text-indigo-600 underline"
       target="_blank"
       rel="noopener noreferrer"
       {...props}

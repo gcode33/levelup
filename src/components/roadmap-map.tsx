@@ -118,7 +118,7 @@ export default function RoadmapMap({
   }, [levels, currentLevelIndex, selectedIndex]);
 
   return (
-    <div className="h-[560px] w-full rounded-xl border border-black/10">
+    <div className="h-[560px] w-full card overflow-hidden">
       <ReactFlow
         nodes={nodes}
         edges={edges}

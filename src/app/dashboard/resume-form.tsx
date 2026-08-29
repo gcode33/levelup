@@ -9,24 +9,24 @@ export default function ResumeForm() {
   const [state, action, pending] = useActionState(uploadResume, initialState);
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl border border-black/10 p-6">
+    <section className="flex flex-col gap-4 card p-6">
       <h2 className="text-xl font-medium">Add your resume</h2>
       <form action={action} className="flex flex-col gap-4">
         <input
           type="file"
           name="file"
           accept=".pdf,.docx"
-          className="rounded border border-black/10 bg-white px-3 py-2 text-sm text-black dark:bg-black dark:text-white"
+          className="input text-sm"
         />
         <textarea
           name="pasted"
           rows={6}
           placeholder="...or paste your resume text here"
-          className="rounded border border-black/10 bg-white px-3 py-2 text-black dark:bg-black dark:text-white"
+          className="input"
         />
         <button
           disabled={pending}
-          className="rounded bg-black px-4 py-2 text-white disabled:opacity-50 dark:bg-white dark:text-black"
+          className="btn-primary"
         >
           {pending ? "Parsing…" : "Parse resume"}
         </button>

@@ -65,7 +65,7 @@ export default async function DashboardPage() {
 
       {hasResume ? (
         <>
-          <section className="flex flex-col gap-2 rounded-xl border border-black/10 p-6">
+          <section className="flex flex-col gap-2 card p-6">
             <h2 className="text-xl font-medium">Your profile</h2>
             <p>
               Role: <span className="font-medium">{profile.current_title ?? "—"}</span>
@@ -86,7 +86,7 @@ export default async function DashboardPage() {
           <RoadmapForm />
 
           {roadmap?.status === "ready" && (
-            <section className="flex flex-col gap-3 rounded-xl border border-black/10 p-6">
+            <section className="flex flex-col gap-3 card p-6">
               <h2 className="text-xl font-medium">Your roadmap</h2>
               <p>
                 Target: <span className="font-medium">{roadmap.target_role}</span>
@@ -96,7 +96,7 @@ export default async function DashboardPage() {
               </p>
               <Link
                 href={`/roadmap/${roadmap.id}`}
-                className="rounded bg-black px-4 py-2 text-center text-sm text-white dark:bg-white dark:text-black"
+                className="btn-primary w-full"
               >
                 Continue learning →
               </Link>
@@ -104,7 +104,7 @@ export default async function DashboardPage() {
           )}
 
           {jobs.length > 0 && (
-            <section className="flex flex-col gap-3 rounded-xl border border-black/10 p-6">
+            <section className="flex flex-col gap-3 card p-6">
               <h2 className="text-xl font-medium">Jobs you&apos;re ready for</h2>
               <p className="text-xs text-zinc-500">Remote roles via Remotive</p>
               <ul className="flex flex-col gap-2">
@@ -121,7 +121,7 @@ export default async function DashboardPage() {
                         href={job.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600"
+                        className="text-indigo-600"
                       >
                         Apply
                       </a>
@@ -139,7 +139,7 @@ export default async function DashboardPage() {
       <form action={signOut}>
         <button
           type="submit"
-          className="rounded bg-black px-4 py-2 text-white dark:bg-white dark:text-black"
+          className="btn-primary"
         >
           Sign out
         </button>

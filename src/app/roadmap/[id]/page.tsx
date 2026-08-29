@@ -84,12 +84,12 @@ export default async function RoadmapPage({
             {roadmap.target_role} · Level {currentLevelIndex + 1} of {totalLevels}
           </p>
         </div>
-        <Link href="/dashboard" className="text-sm text-blue-600 hover:underline">
+        <Link href="/dashboard" className="text-sm text-indigo-600 hover:underline">
           ← Dashboard
         </Link>
       </div>
 
-      <section className="rounded-xl border border-black/10 p-6">
+      <section className="card p-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Your progress</h2>
           <span className="text-sm font-medium">{pct}%</span>
