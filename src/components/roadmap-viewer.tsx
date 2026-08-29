@@ -6,7 +6,12 @@ import RoadmapMap from "./roadmap-map";
 import Markdown from "./markdown";
 import { submitQuiz, markLessonRead, type QuizResult } from "@/app/dashboard/level-actions";
 
-type Lesson = { title: string; content: string; key_points: string[] };
+type Lesson = {
+  title: string;
+  content: string;
+  key_points: string[];
+  resources?: { title: string; url: string; description: string }[];
+};
 type QuizQuestion = {
   question: string;
   options: string[];
@@ -45,6 +50,30 @@ function LessonReader({ lesson, onBack }: { lesson: Lesson; onBack: () => void }
         </div>
       )}
       <Markdown>{lesson.content}</Markdown>
+      {lesson.resources && lesson.resources.length > 0 && (
+        <div className="mt-2">
+          <h4 className="text-sm font-semibold">Further reading</h4>
+          <ul className="mt-1 flex flex-col gap-2">
+            {lesson.resources.map((r, i) => (
+              <li key={i} className="text-sm">
+                {/^https?:\/\//i.test(r.url) ? (
+                  <a
+                    href={r.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-blue-600 underline"
+                  >
+                    {r.title}
+                  </a>
+                ) : (
+                  <span className="font-medium">{r.title}</span>
+                )}
+                <span className="text-zinc-600 dark:text-zinc-400"> — {r.description}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
