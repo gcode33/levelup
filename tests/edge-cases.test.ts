@@ -43,7 +43,7 @@ describe("schema edge cases", () => {
     index: 0,
     title: "T",
     description: "D",
-    lessons: [{ title: "L", content: "C", key_points: ["p"] }],
+    lessons: [{ title: "L", content: "C", key_points: ["p"], resources: [] }],
     quiz: [{ question: "Q", options: ["A", "B"], answer_index: 0, explanation: "E" }],
     study_sheet: "S",
     projects: [],

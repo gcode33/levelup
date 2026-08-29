@@ -5,7 +5,7 @@ const validLevel = {
   index: 0,
   title: "Fundamentals",
   description: "Learn the basics",
-  lessons: [{ title: "Intro", content: "body", key_points: ["a"] }],
+  lessons: [{ title: "Intro", content: "body", key_points: ["a"], resources: [] }],
   quiz: [
     { question: "Q?", options: ["A", "B"], answer_index: 0, explanation: "why" },
   ],

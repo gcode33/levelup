@@ -14,10 +14,17 @@ export type ParsedProfile = z.infer<typeof parsedProfileSchema>;
 
 // --- Roadmap ---
 
+export const resourceSchema = z.object({
+  title: z.string(),
+  url: z.string(),
+  description: z.string(),
+});
+
 export const lessonSchema = z.object({
   title: z.string(),
   content: z.string(),
   key_points: z.array(z.string()),
+  resources: z.array(resourceSchema),
 });
 
 export const quizQuestionSchema = z

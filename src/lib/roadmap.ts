@@ -27,7 +27,7 @@ Generate exactly 4-5 ordered levels that take this person from their current lev
       "title": "short milestone title",
       "description": "one sentence framing this level",
       "lessons": [
-        { "title": "lesson title", "content": "a substantial markdown lesson body (see rules)", "key_points": ["takeaway 1", "takeaway 2", "takeaway 3"] }
+        { "title": "lesson title", "content": "a detailed markdown lesson body (see rules)", "key_points": ["takeaway 1", "takeaway 2", "takeaway 3"], "resources": [{ "title": "authoritative source title", "url": "https://example.com", "description": "what it covers" }] }
       ],
       "quiz": [
         { "question": "question text", "options": ["A", "B", "C", "D"], "answer_index": 0, "explanation": "why this answer is correct", "lesson_ref": 0 }
@@ -42,8 +42,9 @@ Generate exactly 4-5 ordered levels that take this person from their current lev
 
 Rules:
 - Each level must have exactly 2 lessons, 8 quiz questions, a study_sheet, and 1-2 projects.
-- Each lesson's "content" is a substantial markdown body (300-500 words) teaching that specific topic: use "##" subsections, bullet lists, and fenced code blocks for code examples where relevant.
+- Each lesson's "content" is a detailed markdown body (600-900 words) teaching that specific topic: use "##" subsections (e.g. core concepts, a worked example, common pitfalls, a short practice task), bullet lists, and fenced code blocks for code examples where relevant.
 - lessons[].key_points is a non-empty array of 3-5 short strings summarizing the most important takeaways.
+- Each lesson's "resources" is a list of 2-4 authoritative sources for further reading (official documentation, MDN, reputable books/articles), ordered primary-first. Only include URLs you are confident exist; when unsure of an exact deep link, use the well-known top-level URL for that source.
 - Every quiz question has exactly 4 options; answer_index is the 0-based index of the single correct option.
 - Quiz questions must test the lessons: each question's "lesson_ref" is the 0-based index of the lesson it covers; distribute the 8 questions across the 2 lessons and make each question specific to that lesson's material.
 - Content must be specific and educational for the target role, not generic filler.
@@ -58,7 +59,7 @@ export async function generateRoadmap(
   const prompt = buildPrompt(profile, targetRole, targetPay);
 
   const first = await completeChat(prompt, {
-    maxTokens: 8000,
+    maxTokens: 16000,
     temperature: 0.3,
   });
   try {
