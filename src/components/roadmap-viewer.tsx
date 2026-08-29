@@ -10,6 +10,7 @@ type Lesson = { title: string; content: string; key_points: string[] };
 type QuizQuestion = {
   question: string;
   options: string[];
+  lesson_ref?: number;
 };
 type Project = { title: string; description: string; skills_used: string[] };
 
@@ -137,27 +138,57 @@ export default function RoadmapViewer({
               </ul>
 
               <h4 className="mt-4 text-sm font-semibold">Quiz</h4>
-              {quiz.map((q, qi) => (
-                <div key={qi} className="mt-2">
-                  <p className="text-sm font-medium">
-                    {qi + 1}. {q.question}
-                  </p>
-                  <div className="mt-1 flex flex-col gap-1">
-                    {q.options.map((opt, oi) => (
-                      <label key={oi} className="flex items-center gap-2 text-sm">
-                        <input
-                          type="radio"
-                          name={`q-${qi}`}
-                          value={oi}
-                          checked={answers[qi] === oi}
-                          onChange={() => setAnswers((a) => ({ ...a, [qi]: oi }))}
-                        />
-                        {opt}
-                      </label>
-                    ))}
+              {quiz.map((q, qi) => {
+                const pr = result?.perQuestion?.[qi];
+                return (
+                  <div key={qi} className="mt-3">
+                    <p className="text-sm font-medium">
+                      {qi + 1}. {q.question}
+                      {q.lesson_ref != null && lessons[q.lesson_ref] && (
+                        <span className="ml-2 rounded bg-black/5 px-1.5 py-0.5 text-xs font-normal text-zinc-500 dark:bg-white/10">
+                          {lessons[q.lesson_ref].title}
+                        </span>
+                      )}
+                    </p>
+                    <div className="mt-1 flex flex-col gap-1">
+                      {q.options.map((opt, oi) => {
+                        const isCorrect = pr?.correct_index === oi;
+                        const isUserWrong =
+                          pr != null && pr.user_answer === oi && !pr.is_correct;
+                        return (
+                          <label
+                            key={oi}
+                            className={`flex items-center gap-2 text-sm ${
+                              isCorrect
+                                ? "font-medium text-green-700 dark:text-green-400"
+                                : ""
+                            } ${isUserWrong ? "text-red-600 dark:text-red-400" : ""}`}
+                          >
+                            <input
+                              type="radio"
+                              name={`q-${qi}`}
+                              value={oi}
+                              checked={answers[qi] === oi}
+                              onChange={() => {
+                                setAnswers((a) => ({ ...a, [qi]: oi }));
+                                setResult(null);
+                              }}
+                            />
+                            {opt}
+                            {isCorrect && " ✅"}
+                            {isUserWrong && " ❌"}
+                          </label>
+                        );
+                      })}
+                    </div>
+                    {pr && (
+                      <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+                        {pr.is_correct ? "Correct." : "Incorrect."} {pr.explanation}
+                      </p>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
               <button
                 onClick={handleSubmit}
