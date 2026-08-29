@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import RoadmapMap from "./roadmap-map";
+import Markdown from "./markdown";
 import { submitQuiz, type QuizResult } from "@/app/dashboard/level-actions";
 
 type Lesson = { title: string; content: string; key_points: string[] };
@@ -22,6 +23,31 @@ export type LevelData = {
   projects: Project[];
 };
 
+function LessonReader({ lesson, onBack }: { lesson: Lesson; onBack: () => void }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <button
+        onClick={onBack}
+        className="self-start text-sm text-blue-600 hover:underline"
+      >
+        ← Back to level
+      </button>
+      <h3 className="text-lg font-medium">{lesson.title}</h3>
+      {lesson.key_points?.length > 0 && (
+        <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-950/40">
+          <h4 className="text-sm font-semibold">Key points</h4>
+          <ul className="mt-1 list-disc pl-5 text-sm">
+            {lesson.key_points.map((kp, i) => (
+              <li key={i}>{kp}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <Markdown>{lesson.content}</Markdown>
+    </div>
+  );
+}
+
 export default function RoadmapViewer({
   roadmapId,
   levels,
@@ -33,6 +59,7 @@ export default function RoadmapViewer({
 }) {
   const router = useRouter();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(0);
+  const [selectedLesson, setSelectedLesson] = useState<number | null>(null);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [result, setResult] = useState<QuizResult | null>(null);
   const [pending, setPending] = useState(false);
@@ -48,6 +75,7 @@ export default function RoadmapViewer({
 
   function selectLevel(index: number) {
     setSelectedIndex(index);
+    setSelectedLesson(null);
     setAnswers({});
     setResult(null);
   }
@@ -77,20 +105,33 @@ export default function RoadmapViewer({
 
       {level && (
         <section className="rounded-xl border border-black/10 p-6">
-          <h3 className="text-lg font-medium">{level.title}</h3>
-          <p className="text-sm text-zinc-600">{level.description}</p>
-
           {!unlocked ? (
             <p className="mt-3 text-sm text-zinc-500">
               🔒 Complete the previous level to unlock this one.
             </p>
+          ) : selectedLesson !== null && lessons[selectedLesson] ? (
+            <LessonReader
+              lesson={lessons[selectedLesson]}
+              onBack={() => setSelectedLesson(null)}
+            />
           ) : (
             <>
+              <h3 className="text-lg font-medium">{level.title}</h3>
+              <p className="text-sm text-zinc-600">{level.description}</p>
+
               <h4 className="mt-4 text-sm font-semibold">Lessons</h4>
-              <ul className="mt-1 flex flex-col gap-2">
+              <ul className="mt-2 flex flex-col gap-2">
                 {lessons.map((ls, i) => (
-                  <li key={i} className="text-sm">
-                    <span className="font-medium">{ls.title}.</span> {ls.content}
+                  <li key={i}>
+                    <button
+                      onClick={() => setSelectedLesson(i)}
+                      className="flex w-full flex-col gap-1 rounded-lg border border-black/10 p-3 text-left transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                    >
+                      <span className="font-medium">{ls.title}</span>
+                      {ls.key_points?.[0] && (
+                        <span className="text-xs text-zinc-500">{ls.key_points[0]}</span>
+                      )}
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -141,12 +182,18 @@ export default function RoadmapViewer({
               {(completed || result?.passed) && (
                 <>
                   <h4 className="mt-4 text-sm font-semibold">Study sheet</h4>
-                  <p className="text-sm">{studySheet}</p>
+                  <Markdown>{studySheet}</Markdown>
                   <h4 className="mt-4 text-sm font-semibold">Project ideas</h4>
                   <ul className="list-disc pl-6 text-sm">
                     {projects.map((p, i) => (
                       <li key={i}>
-                        {p.title}: {p.description}
+                        <span className="font-medium">{p.title}:</span> {p.description}
+                        {p.skills_used?.length > 0 && (
+                          <span className="text-xs text-zinc-500">
+                            {" "}
+                            ({p.skills_used.join(", ")})
+                          </span>
+                        )}
                       </li>
                     ))}
                   </ul>
