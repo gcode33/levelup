@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/login/actions";
 import ResumeForm from "./resume-form";
 import RoadmapForm from "./roadmap-form";
-import RoadmapViewer from "@/components/roadmap-viewer";
 import PersonalizeForm from "./personalize-form";
 
 export default async function DashboardPage() {
@@ -55,12 +55,6 @@ export default async function DashboardPage() {
     .order("min_level_index", { ascending: false })
     .limit(10);
 
-  // Strip the quiz answer key before it reaches the client.
-  const safeLevels = (roadmap?.levels ?? []).map((lv: any) => ({
-    ...lv,
-    quiz: (lv.quiz ?? []).map((q: any) => ({ question: q.question, options: q.options })),
-  }));
-
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-12">
       <h1 className="text-3xl font-semibold">Dashboard</h1>
@@ -96,15 +90,20 @@ export default async function DashboardPage() {
           <RoadmapForm />
 
           {roadmap?.status === "ready" && (
-            <section className="flex flex-col gap-3">
-              <h2 className="text-xl font-medium">
-                Roadmap: {roadmap.target_role}
-              </h2>
-              <RoadmapViewer
-                roadmapId={roadmap.id}
-                levels={safeLevels}
-                currentLevelIndex={currentLevelIndex}
-              />
+            <section className="flex flex-col gap-3 rounded-xl border border-black/10 p-6">
+              <h2 className="text-xl font-medium">Your roadmap</h2>
+              <p>
+                Target: <span className="font-medium">{roadmap.target_role}</span>
+              </p>
+              <p className="text-sm text-zinc-600">
+                Level {currentLevelIndex + 1} of {roadmap.levels?.length ?? 0}
+              </p>
+              <Link
+                href={`/roadmap/${roadmap.id}`}
+                className="rounded bg-black px-4 py-2 text-center text-sm text-white dark:bg-white dark:text-black"
+              >
+                Continue learning →
+              </Link>
             </section>
           )}
 
