@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { signIn, signUp, type AuthState } from "./actions";
 import { createClient } from "@/lib/supabase/client";
 
@@ -18,13 +18,16 @@ export default function LoginPage() {
     initialState,
   );
 
+  const [oauthError, setOauthError] = useState<string | null>(null);
+
   async function signInWithGitHub() {
+    setOauthError(null);
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "github",
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
-    if (error) console.error(error);
+    if (error) setOauthError(error.message);
   }
 
   return (
@@ -58,6 +61,9 @@ export default function LoginPage() {
       >
         Continue with GitHub
       </button>
+      {oauthError && (
+        <p className="text-sm text-red-600">GitHub sign-in failed: {oauthError}</p>
+      )}
 
       <section className="flex flex-col gap-4 rounded-xl border border-black/10 p-6">
         <h2 className="text-xl font-medium">Sign up</h2>
