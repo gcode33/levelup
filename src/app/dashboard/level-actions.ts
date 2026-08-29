@@ -6,6 +6,13 @@ import { scoreQuiz, type QuizQuestion } from "@/lib/scoring";
 
 type LevelQuizQuestion = QuizQuestion & { explanation: string };
 
+type CompletedEntry = {
+  best_score?: number;
+  passed?: boolean;
+  attempts?: number;
+  lessons_read?: number[];
+};
+
 export type QuizResult = {
   error: string | null;
   correct: number;
@@ -99,4 +106,47 @@ export async function submitQuiz(
 
   revalidatePath("/dashboard");
   return { error: null, correct, total, score, passed, perQuestion };
+}
+
+export async function markLessonRead(
+  roadmapId: string,
+  levelIndex: number,
+  lessonIndex: number,
+): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: progress } = await supabase
+    .from("progress")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("roadmap_id", roadmapId)
+    .maybeSingle();
+
+  const completed: Record<string, CompletedEntry> = {
+    ...(progress?.completed ?? {}),
+  };
+  const entry = completed[levelIndex] ?? {
+    best_score: 0,
+    passed: false,
+    attempts: 0,
+    lessons_read: [],
+  };
+  const lessonsRead = entry.lessons_read ?? [];
+  if (!lessonsRead.includes(lessonIndex)) lessonsRead.push(lessonIndex);
+  completed[levelIndex] = { ...entry, lessons_read: lessonsRead };
+
+  await supabase.from("progress").upsert(
+    {
+      user_id: user.id,
+      roadmap_id: roadmapId,
+      current_level_index: progress?.current_level_index ?? 0,
+      completed,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id,roadmap_id" },
+  );
 }

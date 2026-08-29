@@ -13,6 +13,13 @@ type RawLevel = LevelData & {
   }>;
 };
 
+type CompletedEntry = {
+  best_score?: number;
+  passed?: boolean;
+  attempts?: number;
+  lessons_read?: number[];
+};
+
 export default async function RoadmapPage({
   params,
 }: {
@@ -43,10 +50,23 @@ export default async function RoadmapPage({
     .maybeSingle();
 
   const currentLevelIndex = progress?.current_level_index ?? 0;
-  const totalLevels = (roadmap.levels ?? []).length;
+  const rawLevels = (roadmap.levels ?? []) as RawLevel[];
+  const totalLevels = rawLevels.length;
+
+  const completed = (progress?.completed ?? {}) as Record<string, CompletedEntry>;
+  const pct = totalLevels > 0 ? Math.round((currentLevelIndex / totalLevels) * 100) : 0;
+  const totalLessons = rawLevels.reduce((n, lv) => n + lv.lessons.length, 0);
+  const lessonsRead = Object.values(completed).reduce(
+    (n, e) => n + (e.lessons_read?.length ?? 0),
+    0,
+  );
+  const xp = Object.values(completed).reduce(
+    (n, e) => n + Math.round((e.best_score ?? 0) * 100),
+    0,
+  );
 
   // Strip the quiz answer key before it reaches the client.
-  const safeLevels = (roadmap.levels ?? []).map((lv: RawLevel) => ({
+  const safeLevels = rawLevels.map((lv) => ({
     ...lv,
     quiz: (lv.quiz ?? []).map((q) => ({
       question: q.question,
@@ -68,6 +88,37 @@ export default async function RoadmapPage({
           ← Dashboard
         </Link>
       </div>
+
+      <section className="rounded-xl border border-black/10 p-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Your progress</h2>
+          <span className="text-sm font-medium">{pct}%</span>
+        </div>
+        <div className="mt-2 h-2 w-full rounded-full bg-black/10 dark:bg-white/10">
+          <div
+            className="h-2 rounded-full bg-blue-500"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <dl className="mt-4 grid grid-cols-3 gap-4 text-center">
+          <div>
+            <dt className="text-xs text-zinc-500">Levels</dt>
+            <dd className="text-lg font-semibold">
+              {currentLevelIndex}/{totalLevels}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs text-zinc-500">Lessons read</dt>
+            <dd className="text-lg font-semibold">
+              {lessonsRead}/{totalLessons}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs text-zinc-500">XP</dt>
+            <dd className="text-lg font-semibold">{xp}</dd>
+          </div>
+        </dl>
+      </section>
 
       <RoadmapViewer
         roadmapId={roadmap.id}
