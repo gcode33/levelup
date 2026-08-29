@@ -27,13 +27,12 @@ export default function PersonalizeForm({
 
   async function apply(nextTheme: string, nextBackground: string) {
     document.documentElement.classList.toggle("dark", nextTheme === "dark");
-    document.body.style.backgroundColor = nextBackground;
     await updatePreferences(nextTheme, nextBackground);
     router.refresh();
   }
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl border border-black/10 p-6">
+    <section className="flex flex-col gap-4 card p-6">
       <h2 className="text-xl font-medium">Personalize</h2>
 
       <div className="flex flex-col gap-2">

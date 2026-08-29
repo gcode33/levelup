@@ -5,7 +5,7 @@ import { generateRoadmapAction, type RoadmapState } from "./roadmap-actions";
 
 const initialState: RoadmapState = { error: null, levelsCount: null };
 const inputCls =
-  "rounded border border-black/10 bg-white px-3 py-2 text-black dark:bg-black dark:text-white";
+  "input";
 
 export default function RoadmapForm() {
   const [state, action, pending] = useActionState(
@@ -14,7 +14,7 @@ export default function RoadmapForm() {
   );
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl border border-black/10 p-6">
+    <section className="flex flex-col gap-4 card p-6">
       <h2 className="text-xl font-medium">Generate your roadmap</h2>
       <form action={action} className="flex flex-col gap-4">
         <input
@@ -31,7 +31,7 @@ export default function RoadmapForm() {
         />
         <button
           disabled={pending}
-          className="rounded bg-black px-4 py-2 text-white disabled:opacity-50 dark:bg-white dark:text-black"
+          className="btn-primary"
         >
           {pending ? "Generating…" : "Generate roadmap"}
         </button>

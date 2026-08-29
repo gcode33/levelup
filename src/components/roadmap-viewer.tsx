@@ -34,7 +34,7 @@ function LessonReader({ lesson, onBack }: { lesson: Lesson; onBack: () => void }
     <div className="flex flex-col gap-3">
       <button
         onClick={onBack}
-        className="self-start text-sm text-blue-600 hover:underline"
+        className="self-start text-sm text-indigo-600 hover:underline"
       >
         ← Back to level
       </button>
@@ -61,7 +61,7 @@ function LessonReader({ lesson, onBack }: { lesson: Lesson; onBack: () => void }
                     href={r.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-medium text-blue-600 underline"
+                    className="font-medium text-indigo-600 underline"
                   >
                     {r.title}
                   </a>
@@ -134,7 +134,7 @@ export default function RoadmapViewer({
       />
 
       {level && (
-        <section className="rounded-xl border border-black/10 p-6">
+        <section className="card p-6">
           {!unlocked ? (
             <p className="mt-3 text-sm text-zinc-500">
               🔒 Complete the previous level to unlock this one.
@@ -225,7 +225,7 @@ export default function RoadmapViewer({
               <button
                 onClick={handleSubmit}
                 disabled={pending}
-                className="mt-4 rounded bg-black px-4 py-2 text-white disabled:opacity-50 dark:bg-white dark:text-black"
+                className="mt-4 btn-primary"
               >
                 {pending ? "Checking…" : "Submit quiz"}
               </button>
