@@ -4,12 +4,20 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { scoreQuiz, type QuizQuestion } from "@/lib/scoring";
 
+type LevelQuizQuestion = QuizQuestion & { explanation: string };
+
 export type QuizResult = {
   error: string | null;
   correct: number;
   total: number;
   score: number;
   passed: boolean;
+  perQuestion?: Array<{
+    correct_index: number;
+    user_answer: number;
+    is_correct: boolean;
+    explanation: string;
+  }>;
 };
 
 export async function submitQuiz(
@@ -33,7 +41,7 @@ export async function submitQuiz(
 
   const level = ((roadmap?.levels as unknown[]) ?? []).find(
     (l) => (l as { index: number }).index === levelIndex,
-  ) as { index: number; quiz: QuizQuestion[] } | undefined;
+  ) as { index: number; quiz: LevelQuizQuestion[] } | undefined;
 
   if (!level)
     return { error: "Level not found", correct: 0, total: 0, score: 0, passed: false };
@@ -53,6 +61,15 @@ export async function submitQuiz(
   }
 
   const { correct, total, score, passed } = scoreQuiz(level.quiz, answers);
+  const perQuestion = level.quiz.map((q, i) => {
+    const userAnswer = answers[i] ?? -1;
+    return {
+      correct_index: q.answer_index,
+      user_answer: userAnswer,
+      is_correct: userAnswer === q.answer_index,
+      explanation: q.explanation ?? "",
+    };
+  });
 
   const completed: Record<string, { best_score: number; passed: boolean; attempts: number }> = {
     ...(progress?.completed ?? {}),
@@ -81,5 +98,5 @@ export async function submitQuiz(
   if (error) return { error: error.message, correct, total, score, passed };
 
   revalidatePath("/dashboard");
-  return { error: null, correct, total, score, passed };
+  return { error: null, correct, total, score, passed, perQuestion };
 }

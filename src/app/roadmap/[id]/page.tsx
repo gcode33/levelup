@@ -4,7 +4,13 @@ import { createClient } from "@/lib/supabase/server";
 import RoadmapViewer, { type LevelData } from "@/components/roadmap-viewer";
 
 type RawLevel = LevelData & {
-  quiz: Array<{ question: string; options: string[]; answer_index: number; explanation: string }>;
+  quiz: Array<{
+    question: string;
+    options: string[];
+    answer_index: number;
+    explanation: string;
+    lesson_ref?: number;
+  }>;
 };
 
 export default async function RoadmapPage({
@@ -42,7 +48,11 @@ export default async function RoadmapPage({
   // Strip the quiz answer key before it reaches the client.
   const safeLevels = (roadmap.levels ?? []).map((lv: RawLevel) => ({
     ...lv,
-    quiz: (lv.quiz ?? []).map((q) => ({ question: q.question, options: q.options })),
+    quiz: (lv.quiz ?? []).map((q) => ({
+      question: q.question,
+      options: q.options,
+      lesson_ref: q.lesson_ref,
+    })),
   }));
 
   return (

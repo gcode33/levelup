@@ -26,6 +26,7 @@ export const quizQuestionSchema = z
     options: z.array(z.string()).min(2),
     answer_index: z.number().int().min(0),
     explanation: z.string(),
+    lesson_ref: z.number().int().min(0).optional(),
   })
   .refine((q) => q.answer_index < q.options.length, {
     message: "answer_index must be within options bounds",

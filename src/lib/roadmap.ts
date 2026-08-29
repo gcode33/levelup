@@ -30,7 +30,7 @@ Generate exactly 4-5 ordered levels that take this person from their current lev
         { "title": "lesson title", "content": "a substantial markdown lesson body (see rules)", "key_points": ["takeaway 1", "takeaway 2", "takeaway 3"] }
       ],
       "quiz": [
-        { "question": "question text", "options": ["A", "B", "C", "D"], "answer_index": 0, "explanation": "why" }
+        { "question": "question text", "options": ["A", "B", "C", "D"], "answer_index": 0, "explanation": "why this answer is correct", "lesson_ref": 0 }
       ],
       "study_sheet": "2-3 sentence summary of this level",
       "projects": [
@@ -41,10 +41,11 @@ Generate exactly 4-5 ordered levels that take this person from their current lev
 }
 
 Rules:
-- Each level must have exactly 2 lessons, 2 quiz questions, a study_sheet, and 1-2 projects.
+- Each level must have exactly 2 lessons, 8 quiz questions, a study_sheet, and 1-2 projects.
 - Each lesson's "content" is a substantial markdown body (300-500 words) teaching that specific topic: use "##" subsections, bullet lists, and fenced code blocks for code examples where relevant.
 - lessons[].key_points is a non-empty array of 3-5 short strings summarizing the most important takeaways.
 - Every quiz question has exactly 4 options; answer_index is the 0-based index of the single correct option.
+- Quiz questions must test the lessons: each question's "lesson_ref" is the 0-based index of the lesson it covers; distribute the 8 questions across the 2 lessons and make each question specific to that lesson's material.
 - Content must be specific and educational for the target role, not generic filler.
 - Return valid JSON only.`;
 }
