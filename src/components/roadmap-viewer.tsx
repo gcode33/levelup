@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import RoadmapMap from "./roadmap-map";
 import Markdown from "./markdown";
-import { submitQuiz, type QuizResult } from "@/app/dashboard/level-actions";
+import { submitQuiz, markLessonRead, type QuizResult } from "@/app/dashboard/level-actions";
 
 type Lesson = { title: string; content: string; key_points: string[] };
 type QuizQuestion = {
@@ -125,7 +125,10 @@ export default function RoadmapViewer({
                 {lessons.map((ls, i) => (
                   <li key={i}>
                     <button
-                      onClick={() => setSelectedLesson(i)}
+                      onClick={() => {
+                        setSelectedLesson(i);
+                        void markLessonRead(roadmapId, level.index, i);
+                      }}
                       className="flex w-full flex-col gap-1 rounded-lg border border-black/10 p-3 text-left transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                     >
                       <span className="font-medium">{ls.title}</span>
